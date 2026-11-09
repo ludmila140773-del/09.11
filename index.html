@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Битва кондитеров - Найди ошибку</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Arial', cursive;
+            /* Ваш фон */
+            background: url('фон.png') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #ffecd2;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 245, 235, 0.3);
+            z-index: -1;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 4px solid rgba(255, 107, 157, 0.3);
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #ff6b9d, #feca57, #48dbfb, #ff9ff3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5em;
+            color: #ff6b9d;
+            text-shadow: 3px 3px 0px #feca57;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        .progress-bar {
+            background: rgba(240, 240, 240, 0.8);
+            border-radius: 20px;
+            height: 30px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff6b9d, #feca57);
+            height: 100%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .task-card {
+            background: linear-gradient(135deg, rgba(255, 245, 245, 0.95) 0%, rgba(255, 229, 229, 0.95) 100%);
+            border: 3px solid #ff6b9d;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .task-number {
+            background: #ff6b9d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            display: inline-block;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .sentence {
+            font-size: 1.4em;
+            color: #333;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border-left: 5px solid #feca57;
+        }
+
+        .classification {
+            font-size: 1.2em;
+            color: #666;
+            margin: 15px 0;
+            padding: 15px;
+            background: rgba(248, 249, 250, 0.95);
+            border-radius: 10px;
+        }
+
+        .classification-label {
+            font-weight: bold;
+            color: #ff6b9d;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-error {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+        }
+
+        .btn-correct {
+            background: linear-gradient(135deg, #48dbfb, #0abde3);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1em;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            color: #721c24;
+            display: block;
+        }
+
+        .explanation {
+            margin-top: 10px;
+            font-size: 0.95em;
+            color: #555;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.5em;
+            color: #ff6b9d;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+
+        .final-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .final-screen h2 {
+            font-size: 2.5em;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 3em;
+            color: #feca57;
+            text-shadow: 3px 3px 0px #ff6b9d;
+            margin: 30px 0;
+        }
+
+        .final-message {
+            font-size: 1.3em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #ff6b9d, #ff8fab);
+            color: white;
+            padding: 20px 50px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-restart:hover {
+            transform: scale(1.05);
+        }
+
+        .confectionery-icon {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="confectionery-icon">🧁🎂</div>
+            <h1 class="title">Битва кондитеров</h1>
+            <p class="subtitle">Найди ошибку в определении предложения!</p>
+        </div>
+
+        <div id="game-screen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill">
+                    <span id="progress-text">1 / 5</span>
+                </div>
+            </div>
+
+            <div class="score-display">
+                Очки: <span id="score">0</span> / 5
+            </div>
+
+            <div class="task-card" id="task-card">
+                <div class="task-number" id="task-number">Задание 1</div>
+                <div class="sentence" id="sentence"></div>
+                <div class="classification">
+                    <span class="classification-label">Определение:</span>
+                    <span id="classification-text"></span>
+                </div>
+                <div class="buttons">
+                    <button class="btn btn-error" onclick="checkAnswer(true)">
+                        ❌ Есть ошибка
+                    </button>
+                    <button class="btn btn-correct" onclick="checkAnswer(false)">
+                        ✅ Всё верно
+                    </button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+
+        <div class="final-screen" id="final-screen">
+            <h2>🎉 Игра окончена! 🎉</h2>
+            <div class="final-score" id="final-score"></div>
+            <div class="final-message" id="final-message"></div>
+            <button class="btn-restart" onclick="restartGame()">
+                🔄 Играть снова
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const tasks = [
+            {
+                sentence: "На столе лежит вкусный пирог.",
+                classification: "сложное предложение",
+                hasError: true,
+                explanation: "Это простое распространённое предложение. Здесь одна грамматическая основа: «лежит пирог». Сложное предложение должно иметь две или более грамматических основ."
+            },
+            {
+                sentence: "Маленький котёнок играл.",
+                classification: "простое распространённое предложение",
+                hasError: false,
+                explanation: "Всё верно! Это простое распространённое предложение. Здесь одна грамматическая основа: «котёнок играл» — значит, предложение простое. Есть второстепенный член «маленький» (определение) — значит, предложение распространённое."
+            },
+            {
+                sentence: "Солнце светило, и птицы пели.",
+                classification: "простое предложение",
+                hasError: true,
+                explanation: "Это сложное предложение. Здесь две грамматические основы: «солнце светило» и «птицы пели». Они соединены союзом «и»."
+            },
+            {
+                sentence: "Кондитер украшал торт, а помощник мыл посуду.",
+                classification: "простое нераспространённое предложение",
+                hasError: true,
+                explanation: "Здесь две ошибки! Во-первых, это сложное предложение (две грамматические основы: «кондитер украшал» и «помощник мыл»). Во-вторых, оно распространённое, так как есть второстепенные члены: «торт», «посуду»."
+            },
+            {
+                sentence: "Вкусное мороженое тает на солнце.",
+                classification: "сложное распространённое предложение",
+                hasError: true,
+                explanation: "Это простое распространённое предложение. Здесь одна грамматическая основа: «мороженое тает». Есть второстепенные члены: «вкусное», «на солнце», поэтому оно распространённое."
+            }
+        ];
+
+        let currentTask = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadTask() {
+            if (currentTask >= tasks.length) {
+                showFinalScreen();
+                return;
+            }
+
+            const task = tasks[currentTask];
+            document.getElementById('task-number').textContent = `Задание ${currentTask + 1}`;
+            document.getElementById('sentence').textContent = task.sentence;
+            document.getElementById('classification-text').textContent = task.classification;
+            document.getElementById('progress-text').textContent = `${currentTask + 1} / ${tasks.length}`;
+            document.getElementById('progress-fill').style.width = `${((currentTask + 1) / tasks.length) * 100}%`;
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('feedback').innerHTML = '';
+            answered = false;
+
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            });
+        }
+
+        function checkAnswer(userSaysHasError) {
+            if (answered) return;
+            answered = true;
+
+            const task = tasks[currentTask];
+            const feedback = document.getElementById('feedback');
+            const isCorrect = userSaysHasError === task.hasError;
+
+            if (isCorrect) {
+                score++;
+                document.getElementById('score').textContent = score;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <strong>✅ Правильно!</strong>
+                    <div class="explanation">${task.explanation}</div>
+                `;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <strong>❌ Неправильно!</strong>
+                    <div class="explanation">${task.explanation}</div>
+                `;
+            }
+
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            });
+
+            setTimeout(() => {
+                currentTask++;
+                loadTask();
+            }, 4000);
+        }
+
+        function showFinalScreen() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'block';
+            document.getElementById('final-score').textContent = `${score} из 5`;
+
+            let message = '';
+            if (score === 5) {
+                message = '🏆 Превосходно! Ты настоящий мастер-кондитер русского языка!';
+            } else if (score >= 3) {
+                message = '👍 Отличная работа! Ты хорошо разбираешься в предложениях!';
+            } else {
+                message = ' Хорошая попытка! Продолжай тренироваться!';
+            }
+            document.getElementById('final-message').textContent = message;
+        }
+
+        function restartGame() {
+            currentTask = 0;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('final-screen').style.display = 'none';
+            loadTask();
+        }
+
+        // Запуск игры
+        loadTask();
+    </script>
+</body>
+</html>
